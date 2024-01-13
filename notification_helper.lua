@@ -234,6 +234,50 @@ local function telegram_bot(sender_number, content)
     log.info("notification_helper", "telegram bot通知发送完成")
 end
 
+local function ntfy(sender_number, content)
+    if not config.notification_channel.ntfy.enabled then
+        return
+    end
+    
+    if utils.is_empty(config.notification_channel.ntfy.topic) then
+        log.warn("notification_helper", "ntfy topic为空，跳过调用ntfy")
+        return
+    end
+
+    if utils.is_empty(config.notification_channel.ntfy.user) then
+        log.warn("notification_helper", "ntfy 用户为空，跳过调用ntfy")
+        return
+    end
+
+    log.info("notification_helper", "正在发送ntfy通知")
+
+    local url = config.notification_channel.ntfy.base_url
+    log.debug("notification_helper", "Calling ntfy url: "..url)
+
+    local request_body = {
+        topic = config.notification_channel.ntfy.topic,
+        title = sender_number,
+        message = content,
+        priority = 5,
+    }
+
+    local basic_auth = string.toBase64(config.notification_channel.ntfy.user..":"..config.notification_channel.ntfy.token)
+
+    local code, headers, body = http.request(
+        "POST",
+        url,
+        { ["Content-Type"] = "application/json",
+          ["Authorization"] = "Basic "..basic_auth },
+        json.encode(request_body),
+        {ipv6=true}
+    ).wait()
+    if code ~= 200 then
+        log.warn("notification_helper", "ntfy API返回值不是200，HTTP状态码："..code.."，响应内容："..(body or ""))
+    end
+
+    log.info("notification_helper", "ntfy通知发送完成")
+end
+
 local notification_channels = {
     bark = bark,
     luatos_notification = luatos_notification,
@@ -241,6 +285,7 @@ local notification_channels = {
     ding_talk_bot = ding_talk_bot,
     pushplus = pushplus,
     telegram_bot = telegram_bot,
+    ntfy = ntfy,
 }
 
 local function call_notification_channels(sender_number, content)

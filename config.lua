@@ -67,7 +67,17 @@ config.notification_channel = {
     pushplus = {
         enabled = false,
         token = ""
-    }
+    },
+    -- ntfy (官方服务器是公开的，不适合短信转发，使用自托管的版本，并启用账号和密码)
+    ntfy = {
+        enabled = false,
+        -- 推送地址，如https://ntfy.example.com
+        base_url = "",
+        -- 主题，如 sms
+        topic = "",
+        user = "",
+        password = ""
+    },
 }
 
 return config
