@@ -97,10 +97,10 @@ end
 
 -- 解码GSM 7-bit编码
 local function gsm_7bit_decode(data, longsms)
-    local ucsdata, lpcnt, tmpdata, resdata, nbyte, nleft, ucslen, olddat = "", #data / 2, 0, 0, 0, 0, 0
+    local ucsdata, lpcnt, tmpdata, resdata, nbyte, nleft, ucslen, olddat = "", #data / 2, 0, 0, 0, 0, 0, 0
 
     if longsms then
-        tmpdata = tonumber("0x" .. data:sub(1, 2))
+        tmpdata = tonumber(data:sub(1, 2), 16)
         resdata = tmpdata >> 1
         if olddat == 27 then
             if charmap_ext[resdata] then --特殊字符
@@ -114,7 +114,7 @@ local function gsm_7bit_decode(data, longsms)
         end
         ucsdata = ucsdata .. string.format("%04X", resdata)
     else
-        tmpdata = tonumber("0x" .. data:sub(1, 2))
+        tmpdata = tonumber(data:sub(1, 2), 16)
         resdata = ((tmpdata<<nbyte)|nleft)&0x7f
         if olddat == 27 then
             if charmap_ext[resdata] then --特殊字符
@@ -134,7 +134,7 @@ local function gsm_7bit_decode(data, longsms)
     end
 
     for i = 2, lpcnt do
-        tmpdata = tonumber("0x" .. data:sub((i - 1) * 2 + 1, i * 2))
+        tmpdata = tonumber(data:sub((i - 1) * 2 + 1, i * 2), 16)
         if tmpdata == nil then break end
         resdata = ((tmpdata<<nbyte)|nleft)&0x7f
         if olddat == 27 then
